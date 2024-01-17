@@ -15,11 +15,11 @@ int main()
 
     // Declare your infinite update loop.
     ctx.update = [&]() {
-        ctx.background(p6::NamedColor::Red);
-        ctx.circle(
+        ctx.background(p6::NamedColor::White);
+        /*ctx.circle(
             p6::Center{ctx.mouse()},
             p6::Radius{0.2f}
-        );
+        );*/
     };
 
     // Should be done last. It starts the infinite loop.
