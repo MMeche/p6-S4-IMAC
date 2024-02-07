@@ -1,6 +1,6 @@
 #pragma once
-
 #include <cmath>
+
 class Vec3
 {
     private : 
@@ -12,10 +12,13 @@ class Vec3
         //Binary Operation.
         Vec3(float x, float y, float z) : _x{x},_y{y},_z{z}
         {}
+        Vec3(Vec3& other) = default;
         Vec3();
+        ~Vec3();
 
         Vec3& operator=(Vec3& other) = default;
-        Vec3 operator+(Vec3 other)
+
+        Vec3 operator+(Vec3& other)
         {
            return  {_x+other._x,_y+other._y,_z+other._z};
         }
