@@ -1,4 +1,6 @@
 #include <cstdlib>
+#include "glm/detail/qualifier.hpp"
+#include "glm/fwd.hpp"
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "doctest/doctest.h"
 #include "p6/p6.h"
@@ -19,11 +21,12 @@ int main()
     // Declare your infinite update loop.
     ctx.update = [&]() {
         ctx.background(p6::NamedColor::BlueGray);
-        boids.update();
+        boids.update(ctx.delta_time());
         for(Boid &b : boids.getFlock())
         {
-            ctx.circle(glm::vec2(b.getCoords().x,b.getCoords().y),b.meshRadius);
+            ctx.triangle( glm::vec2(b.meshRadius/2,0),glm::vec2(0,2*b.meshRadius), glm::vec2(-b.meshRadius/2,0), p6::Center(b.getCoords()));
         }
+        ctx.square(p6::Center(0,0),p6::Radius(1),p6::Angle(glm::vec2(0,0)));
 
     };
 

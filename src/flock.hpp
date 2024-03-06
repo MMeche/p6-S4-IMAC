@@ -1,6 +1,7 @@
 #pragma once
 #include "boid.hpp"
 #include <vector>
+#include "p6/p6.h"
 #include <random>
 
 class Flock{
@@ -10,7 +11,7 @@ class Flock{
     public :
         explicit Flock(int n = 30);
 
-        void update();
+        void update(float deltaTime);
 
         inline std::vector<Boid> getFlock(){return _boids;}
 };

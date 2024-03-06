@@ -19,10 +19,10 @@ Flock::Flock(int n)
     }
 }
 
-void Flock::update()
+void Flock::update(float deltaTime)
 {
     for(Boid &b : _boids)
     {
-        b.update(_boids);
+        b.update(_boids,deltaTime);
     }
 }

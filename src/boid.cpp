@@ -2,30 +2,21 @@
 #include <algorithm>
 #include <vector>
 #include "glm/common.hpp"
+#include "p6/p6.h"
 #include "glm/geometric.hpp"
 
 
 void Boid::SeparationForce(std::vector<Boid>& f){
     glm::vec3 totalForce;
-    int cmp{};
     for(Boid &b : f)
     {
         float distance = glm::distance(_coords,b._coords);
         if((distance > 0 ) && distance<=_separationRadius)
         {
-            totalForce += glm::normalize(_coords-b._coords)/distance;
-            cmp++;
+            totalForce += (_coords-b._coords)/distance;
         }
     }
-    if(cmp>0)
-    {
-        totalForce/=cmp;
-    }
-    totalForce = glm::normalize(totalForce);
-    totalForce *= MAXSPEED;
-    totalForce -= _velocity;
-
-    _acceleration += 5.f*glm::normalize(totalForce)*MAXFORCE;
+    _acceleration += totalForce;
 }
 
 void Boid::AlignementForce(std::vector<Boid>& f){
@@ -44,12 +35,8 @@ void Boid::AlignementForce(std::vector<Boid>& f){
     if(cmp>0)
     {
         direction /= cmp;
-        direction = glm::normalize(direction);
-        direction *= MAXSPEED;
-        
-        glm::vec3 steer = direction - _velocity;
 
-        _acceleration += 0.5f*glm::normalize(steer)*MAXFORCE;
+        _acceleration += direction;
     }
 }
 
@@ -68,31 +55,26 @@ void Boid::CohesionForce(std::vector<Boid>& f){
     if(cmp>0)
     {
         target /= cmp;
-        glm::vec3 desired = (target - _coords);
-        desired = glm::normalize(desired)*MAXSPEED;
-
-        glm::vec3 steer = desired - _velocity;
-        _acceleration += 0.05f*glm::normalize(steer)*MAXFORCE;
+        _acceleration += target;
     }
 }
 
 void Boid::wrapAround()
 {
-    if(_coords.x > 1.)  {_coords.x = -1.+meshRadius;}
-    if(_coords.y > 1.)  {_coords.y = -1.+meshRadius;}
-    if(_coords.x < -1.) {_coords.x =  1.-meshRadius;}
-    if(_coords.y < -1.) {_coords.y =  1.-meshRadius;}
+    if(_coords.x + meshRadius > 1.)  {_coords.x = -1.+meshRadius;}
+    if(_coords.y + meshRadius > 1.)  {_coords.y = -1.+meshRadius;}
+    if(_coords.x - meshRadius < -1.) {_coords.x =  1.-meshRadius;}
+    if(_coords.y - meshRadius < -1.) {_coords.y =  1.-meshRadius;}
 }
 
-void Boid::update(std::vector<Boid>& f){
+void Boid::update(std::vector<Boid>& f, float deltaTime){
     SeparationForce(f);
     AlignementForce(f);
     CohesionForce(f);
 
-    _velocity += _acceleration;
+    _velocity += _acceleration * deltaTime;
     _velocity  = glm::normalize(_velocity)*MAXSPEED;
-    std::cout<<_velocity.x<<", "<<_velocity.y<<"\n";
-    _coords   += _velocity;
+    _coords   += _velocity  * deltaTime;
     wrapAround();
     _acceleration = glm::vec3(0,0,0);
 }

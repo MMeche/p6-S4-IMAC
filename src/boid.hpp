@@ -1,6 +1,8 @@
 #pragma once
 #include <vector>
 #include<iostream>
+#include "glm/gtx/vector_angle.hpp"
+#include "p6/p6.h"
 #include <glm/glm.hpp>
 
 
@@ -10,12 +12,12 @@ class Boid{
         glm::vec3 _velocity;
         glm::vec3 _acceleration{};
         
-        float _separationRadius = 0.1;
-        float _alignementRadius = 0.1;
-        float _cohesionRadius   = 0.1;
+        float _separationRadius = 0.2;
+        float _alignementRadius = 0.15;
+        float _cohesionRadius   = 0.15;
     public:
-        static constexpr float MAXSPEED = 0.01;
-        static constexpr float MAXFORCE = 0.0001;
+        static constexpr float MAXSPEED = 0.1;
+        static constexpr float MAXFORCE = 0.01;
     
         const float meshRadius = 0.05;
 
@@ -30,10 +32,11 @@ class Boid{
     void AlignementForce(std::vector<Boid>& f);
     void CohesionForce  (std::vector<Boid>& f);
     void wrapAround(); 
-    void update(std::vector<Boid> & f);
+    void update(std::vector<Boid> & f,float deltaTime);
 
     inline glm::vec3 getCoords(){return _coords;};
     inline glm::vec3 getSpeed(){return _velocity;};
+
 
     inline void setCoords(glm::vec3 pos){_coords = pos;};
 
