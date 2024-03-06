@@ -40,22 +40,26 @@ void Boid::AlignementForce(std::vector<Boid>& f){
     }
 }
 
-void Boid::CohesionForce(std::vector<Boid>& f){
+void Boid::CohesionForce(std::vector<Boid>& f)
+{
     glm::vec3 target;
-    int cmp{};
-    for(Boid &b : f)
+    int       cmp{};
+    for (Boid& b : f)
     {
-        float distance = glm::distance(_coords,b._coords);
-        if((distance >0) && (distance <= _cohesionRadius))
+        float distance = glm::distance(_coords, b._coords);
+        if ((distance > 0) && (distance <= _cohesionRadius))
         {
             cmp++;
             target += b._coords;
         }
     }
-    if(cmp>0)
+    if (cmp > 0)
     {
         target /= cmp;
-        _acceleration += target;
+        glm::vec3 cohesionDirection = target - _coords;
+
+        // Ajouter cette direction à l'accélération du boid
+        _acceleration += cohesionDirection;
     }
 }
 

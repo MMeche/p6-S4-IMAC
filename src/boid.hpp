@@ -8,16 +8,16 @@
 
 class Boid{
     private :
-        glm::vec3 _coords;
-        glm::vec3 _velocity;
+        glm::vec3 _coords{};
+        glm::vec3 _velocity{};
         glm::vec3 _acceleration{};
         
         float _separationRadius = 0.2;
-        float _alignementRadius = 0.15;
-        float _cohesionRadius   = 0.15;
+        float _alignementRadius = 0.4;
+        float _cohesionRadius   = 0.4;
     public:
-        static constexpr float MAXSPEED = 0.1;
-        static constexpr float MAXFORCE = 0.01;
+        static constexpr float MAXSPEED = 0.4;
+        static constexpr float MAXFORCE = 0.1;
     
         const float meshRadius = 0.05;
 

@@ -24,7 +24,7 @@ int main()
         boids.update(ctx.delta_time());
         for(Boid &b : boids.getFlock())
         {
-            ctx.triangle( glm::vec2(b.meshRadius/2,0),glm::vec2(0,2*b.meshRadius), glm::vec2(-b.meshRadius/2,0), p6::Center(b.getCoords()));
+            ctx.triangle( glm::vec2(2*b.meshRadius,0),glm::vec2(0,b.meshRadius/2), glm::vec2(0,-b.meshRadius/2), p6::Center(b.getCoords()),p6::Angle(b.getSpeed()));
         }
         ctx.square(p6::Center(0,0),p6::Radius(1),p6::Angle(glm::vec2(0,0)));
 
