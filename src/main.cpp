@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <vector>
 #include "glm/detail/qualifier.hpp"
 #include "glm/fwd.hpp"
 #define DOCTEST_CONFIG_IMPLEMENT
@@ -16,17 +17,21 @@ int main()
     auto ctx = p6::Context{{.title = "Simple-p6-Setup"}};
     ctx.maximize_window();
 
-    Flock boids = Flock(30);
+    Flock boids = Flock(50);
+
+    Wall aquarium = Wall(glm::vec3(0,0,0),1.,1.,1.);
+    std::vector<Wall> obstacles;
+    obstacles.push_back(aquarium);
 
     // Declare your infinite update loop.
     ctx.update = [&]() {
         ctx.background(p6::NamedColor::BlueGray);
-        boids.update(ctx.delta_time());
+        boids.update(obstacles,ctx.delta_time());
         for(Boid &b : boids.getFlock())
         {
             ctx.triangle( glm::vec2(2*b.meshRadius,0),glm::vec2(0,b.meshRadius/2), glm::vec2(0,-b.meshRadius/2), p6::Center(b.getCoords()),p6::Angle(b.getSpeed()));
         }
-        ctx.square(p6::Center(0,0),p6::Radius(1),p6::Angle(glm::vec2(0,0)));
+        ctx.square(p6::Center(aquarium.getCoords()));
 
     };
 

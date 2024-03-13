@@ -1,13 +1,13 @@
 #include "boid.hpp"
 #include <algorithm>
-#include <vector>
+
 #include "glm/common.hpp"
 #include "p6/p6.h"
 #include "glm/geometric.hpp"
 
 
-void Boid::SeparationForce(std::vector<Boid>& f){
-    glm::vec3 totalForce;
+void Boid::SeparationForce(std::vector<Boid>& f,std::vector<Wall>& o){
+    glm::vec3 totalForce{};
     for(Boid &b : f)
     {
         float distance = glm::distance(_coords,b._coords);
@@ -15,6 +15,12 @@ void Boid::SeparationForce(std::vector<Boid>& f){
         {
             totalForce += (_coords-b._coords)/distance;
         }
+    }
+    for(Wall &w : o)
+    {
+        float distanceX = _coords.x - w.getCoords().x;
+        float distanceY = _coords.y - w.getCoords().y;
+        if(distanceX <= _separationRadius){}
     }
     _acceleration += totalForce;
 }
@@ -42,8 +48,8 @@ void Boid::AlignementForce(std::vector<Boid>& f){
 
 void Boid::CohesionForce(std::vector<Boid>& f)
 {
-    glm::vec3 target;
-    int       cmp{};
+    glm::vec3 target{};
+    int          cmp{};
     for (Boid& b : f)
     {
         float distance = glm::distance(_coords, b._coords);
@@ -71,10 +77,10 @@ void Boid::wrapAround()
     if(_coords.y - meshRadius < -1.) {_coords.y =  1.-meshRadius;}
 }
 
-void Boid::update(std::vector<Boid>& f, float deltaTime){
-    SeparationForce(f);
+void Boid::update(std::vector<Boid>& f, std::vector<Wall>& o, float deltaTime){
+    SeparationForce(f,o);
     AlignementForce(f);
-    CohesionForce(f);
+    CohesionForce  (f);
 
     _velocity += _acceleration * deltaTime;
     _velocity  = glm::normalize(_velocity)*MAXSPEED;

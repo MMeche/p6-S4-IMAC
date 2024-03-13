@@ -11,7 +11,7 @@ class Flock{
     public :
         explicit Flock(int n = 30);
 
-        void update(float deltaTime);
+        void update(std::vector<Wall> & o, float deltaTime);
 
         inline std::vector<Boid> getFlock(){return _boids;}
 };
