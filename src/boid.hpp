@@ -16,9 +16,17 @@ class Boid{
         float _separationRadius = 0.1;
         float _alignementRadius = 0.4;
         float _cohesionRadius   = 0.4;
+
+        float _obstacleRadius   = 0.2; 
+
+        
     public:
-        static constexpr float MAXSPEED = 0.7;
-        static constexpr float MAXFORCE = 0.4;
+        static constexpr float MAXSPEED = 0.5;
+        static constexpr float MAXFORCE = 0.3;
+
+        static float UI_MAXSPEED ;
+        static float UI_MAXFORCE;
+        static float UI_meshRadius;
     
         const float meshRadius = 0.05;
 
