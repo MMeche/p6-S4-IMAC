@@ -15,7 +15,7 @@ int main()
         return EXIT_FAILURE;
 
     // Actual application code
-    auto ctx = p6::Context{{.title = "Simple-p6-Setup"}};
+    auto ctx = p6::Context{{.title = "Old Boids"}};
     ctx.maximize_window();
 
     Flock boids = Flock(30);
@@ -28,7 +28,14 @@ int main()
     ctx.update = [&]() {
         // User interface controler
         UI::startUI();
-        //ImGui::ShowDemoWindow();
+        if(Flock::UI_NumberBoid > boids.getFlock().size())
+        {
+            boids.instantiateNewBoid(Flock::UI_NumberBoid - boids.getFlock().size());
+        }
+        if(Flock::UI_NumberBoid < boids.getFlock().size())
+        {
+            boids.deleteBoid(boids.getFlock().size() - Flock::UI_NumberBoid);
+        }
         ctx.background(p6::NamedColor::BlueGray);
         boids.update(obstacles, ctx.delta_time());
         for (Boid& b : boids.getFlock())

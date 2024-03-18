@@ -1,6 +1,7 @@
 #pragma once
 #include <imgui.h>
 #include "boid.hpp"
+#include "flock.hpp"
 
 class UI
 {
