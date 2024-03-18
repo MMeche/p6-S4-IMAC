@@ -7,7 +7,9 @@
 #include "p6/p6.h"
 #include "glm/geometric.hpp"
 
-float Boid::UI_MAXFORCE = 1.;
+float Boid::UI_FORCE_COHESION = 1.;
+float Boid::UI_FORCE_ALIGNEMENT = 1.;
+float Boid::UI_FORCE_SEPARATION = 1.;
 float Boid::UI_MAXSPEED = 1.;
 float Boid::UI_meshRadius = 1.;
 
@@ -18,7 +20,7 @@ void Boid::SeparationForce(std::vector<Boid>& f,std::vector<Wall>& o){
         float distance = glm::distance(_coords,b._coords);
         if((distance > 0 ) && distance<=_separationRadius)
         {
-            totalForce += (_coords-b._coords)/distance;
+            totalForce += UI_FORCE_SEPARATION*(_coords-b._coords)/distance;
         }
     }
     for(Wall &w : o)
@@ -55,7 +57,7 @@ void Boid::AlignementForce(std::vector<Boid>& f){
     {
         direction /= cmp;
 
-        _acceleration += direction;
+        _acceleration += UI_FORCE_ALIGNEMENT*direction;
     }
 }
 
@@ -78,7 +80,7 @@ void Boid::CohesionForce(std::vector<Boid>& f)
         glm::vec3 cohesionDirection = target - _coords;
 
         // Ajouter cette direction à l'accélération du boid
-        _acceleration += cohesionDirection;
+        _acceleration += UI_FORCE_COHESION*cohesionDirection;
     }
 }
 

@@ -7,5 +7,5 @@ class UI
 {
     UI(){};
     public:
-    static void startUI();
+    static void startUI(Flock boids);
 };

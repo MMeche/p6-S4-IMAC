@@ -25,7 +25,9 @@ class Boid{
         static constexpr float MAXFORCE = 0.3;
 
         static float UI_MAXSPEED ;
-        static float UI_MAXFORCE;
+        static float UI_FORCE_COHESION;
+        static float UI_FORCE_ALIGNEMENT;
+        static float UI_FORCE_SEPARATION;
         static float UI_meshRadius;
     
         const float meshRadius = 0.05;

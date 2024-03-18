@@ -27,15 +27,7 @@ int main()
     // Declare your infinite update loop.
     ctx.update = [&]() {
         // User interface controler
-        UI::startUI();
-        if(Flock::UI_NumberBoid > boids.getFlock().size())
-        {
-            boids.instantiateNewBoid(Flock::UI_NumberBoid - boids.getFlock().size());
-        }
-        if(Flock::UI_NumberBoid < boids.getFlock().size())
-        {
-            boids.deleteBoid(boids.getFlock().size() - Flock::UI_NumberBoid);
-        }
+        UI::startUI(boids);
         ctx.background(p6::NamedColor::BlueGray);
         boids.update(obstacles, ctx.delta_time());
         for (Boid& b : boids.getFlock())
