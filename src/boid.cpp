@@ -18,7 +18,7 @@ void Boid::SeparationForce(std::vector<Boid>& f,std::vector<Wall>& o){
     for(Boid &b : f)
     {
         float distance = glm::distance(_coords,b._coords);
-        if((distance > 0 ) && distance<=_separationRadius)
+        if((distance > 0 ) && distance<=_separationRadius+UI_meshRadius*meshRadius)
         {
             totalForce += UI_FORCE_SEPARATION*(_coords-b._coords)/distance;
         }
@@ -28,13 +28,18 @@ void Boid::SeparationForce(std::vector<Boid>& f,std::vector<Wall>& o){
         
         float distanceX = std::abs(_coords.x - w.getCoords().x);
         float distanceY = std::abs(_coords.y - w.getCoords().y);
-        if(distanceX >= w.getScaleX()-_obstacleRadius)
+        float distanceZ = std::abs(_coords.z - w.getCoords().z);
+        if(distanceX >= w.getWidth()-_obstacleRadius)
         {
             totalForce += (_coords - glm::vec3(1*glm::sign(_coords.x),_coords.y,_coords.z))/(0.25f*(1-distanceX));
         }
-        if(distanceY >= w.getScaleY()-_obstacleRadius)
+        if(distanceY >= w.getHeigth()-_obstacleRadius)
         {
             totalForce += (_coords - glm::vec3(_coords.x,1*glm::sign(_coords.y),_coords.z))/(0.25f*(1-distanceY));
+        }
+        if(distanceZ >= w.getDepth()-_obstacleRadius)
+        {
+            totalForce += (_coords - glm::vec3(_coords.x,_coords.y,1*glm::sign(_coords.z)))/(0.25f*(1-distanceZ));
         }
     }
     _acceleration += totalForce;
@@ -86,10 +91,13 @@ void Boid::CohesionForce(std::vector<Boid>& f)
 
 void Boid::wrapAround()
 {
-    if(_coords.x + meshRadius*UI_meshRadius > 1.)  {_coords.x = -1.+meshRadius*UI_meshRadius;}
-    if(_coords.y + meshRadius*UI_meshRadius > 1.)  {_coords.y = -1.+meshRadius*UI_meshRadius;}
-    if(_coords.x - meshRadius*UI_meshRadius < -1.) {_coords.x =  1.-meshRadius*UI_meshRadius;}
-    if(_coords.y - meshRadius*UI_meshRadius < -1.) {_coords.y =  1.-meshRadius*UI_meshRadius;}
+    if(_coords.x + meshRadius*UI_meshRadius > Wall::UI_AQUARIUMSIZE)  {_coords.x = -Wall::UI_AQUARIUMSIZE+meshRadius*UI_meshRadius;}
+    if(_coords.y + meshRadius*UI_meshRadius > Wall::UI_AQUARIUMSIZE)  {_coords.y = -Wall::UI_AQUARIUMSIZE+meshRadius*UI_meshRadius;}
+    if(_coords.z + meshRadius*UI_meshRadius > Wall::UI_AQUARIUMSIZE)  {_coords.z = -Wall::UI_AQUARIUMSIZE+meshRadius*UI_meshRadius;}
+
+    if(_coords.x - meshRadius*UI_meshRadius < -Wall::UI_AQUARIUMSIZE) {_coords.x =  Wall::UI_AQUARIUMSIZE-meshRadius*UI_meshRadius;}
+    if(_coords.y - meshRadius*UI_meshRadius < -Wall::UI_AQUARIUMSIZE) {_coords.y =  Wall::UI_AQUARIUMSIZE-meshRadius*UI_meshRadius;}
+    if(_coords.z - meshRadius*UI_meshRadius < -Wall::UI_AQUARIUMSIZE) {_coords.z =  Wall::UI_AQUARIUMSIZE-meshRadius*UI_meshRadius;}
 }
 
 void Boid::update(std::vector<Boid>& f, std::vector<Wall>& o, float deltaTime){

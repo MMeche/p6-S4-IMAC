@@ -12,8 +12,8 @@ Flock::Flock(int n)
     Flock::UI_NumberBoid = n;
     for(int i = 0 ; i < n ; i++)
     {
-        glm::vec3 r_pos   = glm::vec3(distrib(gen),distrib(gen),0);
-        glm::vec3 r_speed = glm::vec3(distrib(gen),distrib(gen),0);
+        glm::vec3 r_pos   = glm::vec3(distrib(gen),distrib(gen),distrib(gen));
+        glm::vec3 r_speed = glm::vec3(distrib(gen),distrib(gen),distrib(gen));
         r_speed = glm::normalize(r_speed);
         r_speed = glm::min(r_speed,r_speed*Boid::MAXSPEED);
         
@@ -26,8 +26,8 @@ void Flock::instantiateNewBoid(int n)
 {
     for(int i = 0 ; i < n ; i++)
     {
-        glm::vec3 r_pos   = glm::vec3(distrib(gen),distrib(gen),0);
-        glm::vec3 r_speed = glm::vec3(distrib(gen),distrib(gen),0);
+        glm::vec3 r_pos   = glm::vec3(distrib(gen),distrib(gen),distrib(gen));
+        glm::vec3 r_speed = glm::vec3(distrib(gen),distrib(gen),distrib(gen));
         r_speed = glm::normalize(r_speed);
         r_speed = glm::min(r_speed,r_speed*Boid::MAXSPEED);
         

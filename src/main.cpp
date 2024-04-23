@@ -1,12 +1,28 @@
 #include <cstdlib>
 #include <vector>
 #include "glm/detail/qualifier.hpp"
+#include "glm/ext/quaternion_trigonometric.hpp"
 #include "glm/fwd.hpp"
+#include "glm/geometric.hpp"
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "doctest/doctest.h"
 #include "p6/p6.h"
 #include "UI.hpp"
 #include "flock.hpp"
+#include <cstddef>
+#include <memory>
+#include "common.hpp"
+#include "cone_vertices.hpp"
+#include "glm/ext/matrix_clip_space.hpp"
+#include "glm/ext/matrix_transform.hpp"
+#include "glm/ext/scalar_constants.hpp"
+#include "glm/matrix.hpp"
+#include "img/src/Image.h"
+#include "p6/p6.h"
+#include"glm/gtc/type_ptr.hpp"
+#include "glm/gtc/random.hpp"
+#include "GLclass.hpp"
+#include "programs.hpp"
 
 int main()
 {
@@ -16,25 +32,231 @@ int main()
 
     // Actual application code
     auto ctx = p6::Context{{.title = "Old Boids"}};
-    ctx.maximize_window();
-
+    
+    
     Flock boids = Flock(30);
 
-    Wall aquarium = Wall(glm::vec3(0,0,0),1.,1.,1.);
+    Wall aquarium = Wall(glm::vec3(0,0,0),Wall::UI_AQUARIUMSIZE);
     std::vector<Wall> obstacles;
     obstacles.push_back(aquarium);
+    
+    const p6::Shader shader = p6::load_shader(
+        "shaders/3D.vs.glsl",
+        "shaders/normal.fs.glsl"
+    );
+    LineProgram LinePrgm{};
+    
+    ctx.maximize_window();
+    
+    
+    //Partie OpenGL
+    
+
+    // Création d'un Vertex Buffer Object et d'un Vertex Array Object
+    VBO vboCones{};
+    VAO vaoCones{};
+
+    VBO vboAquarium{};
+    VAO vaoAquarium{};
+
+    VBO vboDirections{};
+    VAO vaoDirections{};
+    
+
+    vboCones.bind();
+    // Tableau des attributs des sommets pour les cônes des boids.
+    const std::vector<glimac::ShapeVertex> coneVertices = glimac::cone_vertices(1., 0.5, 32, 16);
+    // Stockage des données du tableau vertices dans le vbo placé sur GL_ARRAY_BUFFER (c'est à dire "vboCônes" ici) :
+    glBufferData(GL_ARRAY_BUFFER, coneVertices.size()*sizeof(glimac::ShapeVertex), coneVertices.data(), GL_STATIC_DRAW);
+    vboCones.unbind();
+
+    //On va faire la même chose pour les vertices de l'aquarium
+    vboAquarium.bind();
+    const std::vector<glimac::ShapeVertex> aquaVertices = glimac::aquarium(1.);
+    glBufferData(GL_ARRAY_BUFFER,aquaVertices.size()*sizeof(glimac::ShapeVertex),aquaVertices.data(),GL_STATIC_DRAW);
+    vboAquarium.unbind();
+
+    vboDirections.bind();
+    Vertex3D lineVertices[]{
+        Vertex3D{{0.,0.,0.}},
+        Vertex3D{{0.,1.,0.}}
+    };
+    glBufferData(GL_ARRAY_BUFFER, 2*sizeof(Vertex3D), lineVertices, GL_STATIC_DRAW);
+    vboDirections.unbind();
+    
+    vaoCones.bind();
+    static constexpr GLuint vertex_attr_position = 0;
+    static constexpr GLuint vertex_attr_normal   = 1;
+    static constexpr GLuint vertex_attr_tex      = 2;
+    
+    // Activation de l'attribut de vertex 0; nous l'interpretons comme la position
+    glEnableVertexAttribArray(vertex_attr_position);
+    glEnableVertexAttribArray(vertex_attr_normal);
+    glEnableVertexAttribArray(vertex_attr_tex);
+    
+    
+    vboCones.bind();   
+    
+    // On spécifie le type de donnée de l'attribut position ainsi que la manière dont il est stocké dans le VBO
+    glVertexAttribPointer(
+        vertex_attr_position /* Indice attribut */,
+        3 /* Nombre de composantes */,
+        GL_FLOAT /* Type d'une composante */,
+        GL_FALSE /* Pas de normalisation */,
+        sizeof(glimac::ShapeVertex) /* Taille en octet d'un vertex complet entre chaque attribut position */,
+        (const GLvoid*)offsetof(glimac::ShapeVertex, position)/* OpenGL doit utiliser le VBO attaché à GL_ARRAY_BUFFER et commencer à l'offset 0 */
+    );
+    
+    glVertexAttribPointer(
+        vertex_attr_normal /* Indice attribut */,
+        3 /* Nombre de composantes */,
+        GL_FLOAT /* Type d'une composante */,
+        GL_FALSE /* Pas de normalisation */,
+        sizeof(glimac::ShapeVertex) /* Taille en octet d'un vertex complet entre chaque attribut position */,
+        (const GLvoid*)offsetof(glimac::ShapeVertex, normal) /* OpenGL doit utiliser le VBO attaché à GL_ARRAY_BUFFER et commencer à l'offset 0 */
+    );    
+    glVertexAttribPointer(
+        vertex_attr_tex,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(glimac::ShapeVertex),
+        (const GLvoid*)offsetof(glimac::ShapeVertex, texCoords)
+    );
+    vboCones.unbind();
+    vaoCones.unbind();
+
+    //...Et on recommence avec le vao de l'Aquarium.
+    vaoAquarium.bind();
+    glEnableVertexAttribArray(vertex_attr_position);
+    glEnableVertexAttribArray(vertex_attr_normal);
+    glEnableVertexAttribArray(vertex_attr_tex);
+
+    vboAquarium.bind();
+    // On spécifie le type de donnée de l'attribut position ainsi que la manière dont il est stocké dans le VBO
+    glVertexAttribPointer(
+        vertex_attr_position /* Indice attribut */,
+        3 /* Nombre de composantes */,
+        GL_FLOAT /* Type d'une composante */,
+        GL_FALSE /* Pas de normalisation */,
+        sizeof(glimac::ShapeVertex) /* Taille en octet d'un vertex complet entre chaque attribut position */,
+        (const GLvoid*)offsetof(glimac::ShapeVertex, position)/* OpenGL doit utiliser le VBO attaché à GL_ARRAY_BUFFER et commencer à l'offset 0 */
+    );
+    
+    glVertexAttribPointer(
+        vertex_attr_normal /* Indice attribut */,
+        3 /* Nombre de composantes */,
+        GL_FLOAT /* Type d'une composante */,
+        GL_FALSE /* Pas de normalisation */,
+        sizeof(glimac::ShapeVertex) /* Taille en octet d'un vertex complet entre chaque attribut position */,
+        (const GLvoid*)offsetof(glimac::ShapeVertex, normal) /* OpenGL doit utiliser le VBO attaché à GL_ARRAY_BUFFER et commencer à l'offset 0 */
+    );    
+    glVertexAttribPointer(
+        vertex_attr_tex,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(glimac::ShapeVertex),
+        (const GLvoid*)offsetof(glimac::ShapeVertex, texCoords)
+    );
+
+    vboAquarium.unbind();
+    vaoAquarium.unbind();
+
+    vaoDirections.bind();
+    glEnableVertexAttribArray(vertex_attr_position);
+    vboDirections.bind();
+    glVertexAttribPointer(
+        vertex_attr_position,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(Vertex3D),
+        (const GLvoid*)offsetof(Vertex3D,position)
+    );
+    vboDirections.unbind();
+    vaoDirections.unbind();
+
+    //Uniform Variables
+    GLuint uMVPMatrix    = glGetUniformLocation(shader.id(),static_cast<const GLchar*>("uMVPMatrix"));
+    GLuint uMVMatrix     = glGetUniformLocation(shader.id(),static_cast<const GLchar*>("uMVMatrix"));
+    GLuint uNormalMatrix = glGetUniformLocation(shader.id(),static_cast<const GLchar*>("uNormalMatrix"));
+    GLuint uTexture      = glGetUniformLocation(shader.id(),static_cast<const GLchar*>("uTexture"));
+    
+    glEnable(GL_DEPTH_TEST);
+    
+    glm::vec3 cameraPos = {0.,0.,0.};
+
 
     // Declare your infinite update loop.
     ctx.update = [&]() {
         // User interface controler
-        UI::startUI(boids);
-        ctx.background(p6::NamedColor::BlueGray);
+        UI::startUI(boids,obstacles);
         boids.update(obstacles, ctx.delta_time());
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
+        // DESSIN DES BOIDS
+        shader.use();
+        
+
+        glm::mat4 ProjMatrix   = glm::perspective(glm::radians(100.f), ctx.aspect_ratio(), 0.1f, 100.f);
+        glm::mat4 MVMatrix     = glm::translate(glm::mat4{1.f},-cameraPos);
+        glm::mat4 NormalMatrix = glm::transpose(glm::inverse(MVMatrix));
+        glm::mat4 MVPMatrix    = ProjMatrix * MVMatrix;
+        
+        
         for (Boid& b : boids.getFlock())
         {
-            ctx.triangle(glm::vec2(2 * b.meshRadius*Boid::UI_meshRadius, 0), glm::vec2(0, b.meshRadius*Boid::UI_meshRadius / 2), glm::vec2(0, -b.meshRadius*Boid::UI_meshRadius / 2), p6::Center(b.getCoords()), p6::Angle(b.getSpeed()));
+            shader.use();
+            vaoCones.bind();
+            glm::vec3 direction = b.getSpeed();
+            
+            MVMatrix     = glm::translate(glm::mat4{1.f},glm::vec3(0,0,-5.f));
+            MVMatrix     = glm::translate(MVMatrix, b.getCoords()); // Translation * Rotation * Translation
+            MVMatrix     = glm::rotate(MVMatrix, glm::angle(glm::vec3{0.,1.,0.},glm::normalize(direction)),glm::normalize(glm::cross(glm::vec3{0.,1.,0.}, direction)));
+            MVMatrix     = glm::scale(MVMatrix, glm::vec3{.2f*Boid::UI_meshRadius}); // Translation * Rotation * Translation * Scale
+            
+            NormalMatrix = glm::transpose(glm::inverse(MVMatrix));
+            MVPMatrix = ProjMatrix * MVMatrix;
+            
+            glUniformMatrix4fv(uNormalMatrix,1,GL_FALSE,glm::value_ptr(NormalMatrix));
+            glUniformMatrix4fv(uMVMatrix,1,GL_FALSE,glm::value_ptr(MVMatrix));
+            glUniformMatrix4fv(uMVPMatrix,1,GL_FALSE,glm::value_ptr(MVPMatrix));
+            
+            glDrawArrays(GL_TRIANGLES, 0 /* Pas d'offset au début du VBO */, coneVertices.size());
+            vaoCones.unbind(); 
+
+            vaoDirections.bind();
+            LinePrgm.m_program.use();
+            MVMatrix     = glm::translate(glm::mat4{1.f},glm::vec3(0,0,-5.f));
+            MVMatrix     = glm::translate(MVMatrix, b.getCoords());
+            MVMatrix     = glm::rotate(MVMatrix, glm::angle(glm::vec3{0.,1.,0.},glm::normalize(direction)),glm::normalize(glm::cross(glm::vec3{0.,1.,0.}, direction))); 
+            MVMatrix     = glm::translate(MVMatrix, glm::normalize(direction)*0.2f);// Translation * Rotation * Translation
+            MVMatrix     = glm::scale(MVMatrix, glm::vec3{.2f*Boid::UI_meshRadius}); // Translation * Rotation * Translation * Scale
+            
+            NormalMatrix = glm::transpose(glm::inverse(MVMatrix));
+            MVPMatrix = ProjMatrix * MVMatrix;
+            glUniformMatrix4fv(uMVPMatrix,1,GL_FALSE,glm::value_ptr(MVPMatrix));
+            glDrawArrays(GL_LINES,0,2);
+            vaoDirections.unbind();
         }
-        ctx.square(p6::Center(aquarium.getCoords()));
+        
+        shader.use();
+        //DESSIN DE L'AQUARIUM
+        vaoAquarium.bind();
+        MVMatrix = glm::translate(glm::mat4{1.f},glm::vec3(0,0,-5.f));
+        MVMatrix = glm::scale(MVMatrix, glm::vec3{Wall::UI_AQUARIUMSIZE});
+
+        NormalMatrix = glm::transpose(glm::inverse(MVMatrix));
+        MVPMatrix = ProjMatrix * MVMatrix;
+
+        glUniformMatrix4fv(uNormalMatrix,1,GL_FALSE,glm::value_ptr(NormalMatrix));
+        glUniformMatrix4fv(uMVMatrix,1,GL_FALSE,glm::value_ptr(MVMatrix));
+        glUniformMatrix4fv(uMVPMatrix,1,GL_FALSE,glm::value_ptr(MVPMatrix));
+
+        glDrawArrays(GL_TRIANGLES, 0 /* Pas d'offset au début du VBO */, aquaVertices.size());
+        
+        vaoAquarium.unbind();
 
     };
 

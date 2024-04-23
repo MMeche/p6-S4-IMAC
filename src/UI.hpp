@@ -7,5 +7,5 @@ class UI
 {
     UI(){};
     public:
-    static void startUI(Flock boids);
+    static void startUI(Flock& boids,std::vector<Wall>& obstacles);
 };
