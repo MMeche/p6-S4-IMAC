@@ -96,10 +96,10 @@ std::vector<ShapeVertex> cube_vertices(float size){
     std::vector<glm::vec3> normals = {
         {1, 0, 0}, // Front
         {0, 0, -1},  // Right
-        {1, 0, 0},  // Back
+        {-1, 0, 0},  // Back
         {0, 0, 1}, // Left
         {0, 1, 0},  // Top
-        {0, 1, 0}  // Bottom
+        {0, -1, 0}  // Bottom
     };
 
     for(size_t i = 0; i < faces.size(); i++){

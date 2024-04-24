@@ -40,11 +40,20 @@ int main()
     obstacles.push_back(aquarium);
     //obstacles.push_back(catWalker);
     
+    img::Image cloud = p6::load_image_buffer("assets/clouds.jpg");
+
+    img::Image souslocean1 = p6::load_image_buffer("assets/aquarium_1.png");
+    img::Image souslocean2 = p6::load_image_buffer("assets/aquarium_2.png");
+
+    
+    
+    
+
     const p6::Shader shader = p6::load_shader(
         "shaders/3D.vs.glsl",
         "shaders/normal.fs.glsl"
     );
-    
+    AquariumProgram AquariumPrgm{};
     ctx.maximize_window();
     
     
@@ -57,9 +66,23 @@ int main()
 
     VBO vboAquarium{};
     VAO vaoAquarium{};
+     //texture bindings
+        TextureID oceanTex1{};
+        TextureID oceanTex2{};
+        // TextureID oceanTex3{};
+        // TextureID cielTex{};
 
-    // VBO vboDirections{};
-    // VAO vaoDirections{};
+        oceanTex1.bind();
+        glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,souslocean1.width(),souslocean1.height(), 0,GL_RGBA,GL_UNSIGNED_BYTE,souslocean1.data());
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        oceanTex1.unbind();
+
+        oceanTex2.bind();
+        glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,souslocean2.width(),souslocean2.height(), 0,GL_RGBA,GL_UNSIGNED_BYTE,souslocean2.data());
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        oceanTex2.unbind();
     
 
     vboCones.bind();
@@ -74,14 +97,6 @@ int main()
     const std::vector<glimac::ShapeVertex> aquaVertices = glimac::cube_vertices(1.);
     glBufferData(GL_ARRAY_BUFFER,aquaVertices.size()*sizeof(glimac::ShapeVertex),aquaVertices.data(),GL_STATIC_DRAW);
     vboAquarium.unbind();
-
-    // vboDirections.bind();
-    // Vertex3D lineVertices[]{
-    //     Vertex3D{{0.,0.,0.}},
-    //     Vertex3D{{0.,1.,0.}}
-    // };
-    // glBufferData(GL_ARRAY_BUFFER, 2*sizeof(Vertex3D), lineVertices, GL_STATIC_DRAW);
-    // vboDirections.unbind();
     
     vaoCones.bind();
     static constexpr GLuint vertex_attr_position = 0;
@@ -180,7 +195,6 @@ int main()
     GLuint uMVPMatrix    = glGetUniformLocation(shader.id(),static_cast<const GLchar*>("uMVPMatrix"));
     GLuint uMVMatrix     = glGetUniformLocation(shader.id(),static_cast<const GLchar*>("uMVMatrix"));
     GLuint uNormalMatrix = glGetUniformLocation(shader.id(),static_cast<const GLchar*>("uNormalMatrix"));
-    GLuint uTexture      = glGetUniformLocation(shader.id(),static_cast<const GLchar*>("uTexture"));
     
     glEnable(GL_DEPTH_TEST);
     
@@ -248,23 +262,9 @@ int main()
             
             glDrawArrays(GL_TRIANGLES, 0 /* Pas d'offset au début du VBO */, coneVertices.size());
             vaoCones.unbind(); 
-
-            // vaoDirections.bind();
-            // LinePrgm.m_program.use();
-            // MVMatrix     = glm::translate(glm::mat4{1.f},glm::vec3(0,0,-5.f));
-            // MVMatrix     = glm::translate(MVMatrix, b.getCoords());
-            // MVMatrix     = glm::rotate(MVMatrix, glm::angle(glm::vec3{0.,1.,0.},glm::normalize(direction)),glm::normalize(glm::cross(glm::vec3{0.,1.,0.}, direction))); 
-            // MVMatrix     = glm::translate(MVMatrix, glm::normalize(direction)*0.2f);// Translation * Rotation * Translation
-            // MVMatrix     = glm::scale(MVMatrix, glm::vec3{.2f*Boid::UI_meshRadius}); // Translation * Rotation * Translation * Scale
-            
-            // NormalMatrix = glm::transpose(glm::inverse(MVMatrix));
-            // MVPMatrix = ProjMatrix * MVMatrix;
-            // glUniformMatrix4fv(uMVPMatrix,1,GL_FALSE,glm::value_ptr(MVPMatrix));
-            // glDrawArrays(GL_LINES,0,2);
-            // vaoDirections.unbind();
         }
         
-        shader.use();
+        AquariumPrgm.m_program.use();
         //DESSIN DE L'AQUARIUM
         vaoAquarium.bind();
         // MVMatrix = glm::translate(glm::mat4{1.f},glm::vec3(0,0,-5.f));
@@ -275,12 +275,26 @@ int main()
         NormalMatrix = glm::transpose(glm::inverse(MVMatrix));
         MVPMatrix = ProjMatrix * MVMatrix;
 
-        glUniformMatrix4fv(uNormalMatrix,1,GL_FALSE,glm::value_ptr(NormalMatrix));
-        glUniformMatrix4fv(uMVMatrix,1,GL_FALSE,glm::value_ptr(MVMatrix));
-        glUniformMatrix4fv(uMVPMatrix,1,GL_FALSE,glm::value_ptr(MVPMatrix));
+        glUniformMatrix4fv(AquariumPrgm.uNormalMatrix,1,GL_FALSE,glm::value_ptr(NormalMatrix));
+        glUniformMatrix4fv(AquariumPrgm.uMVMatrix,1,GL_FALSE,glm::value_ptr(MVMatrix));
+        glUniformMatrix4fv(AquariumPrgm.uMVPMatrix,1,GL_FALSE,glm::value_ptr(MVPMatrix));
+        
+        glActiveTexture(GL_TEXTURE0);
+        oceanTex1.bind();
+        glActiveTexture(GL_TEXTURE1);
+        oceanTex2.bind();
+
+        glUniform1i(AquariumPrgm.uTexture1,0);
+        glUniform1i(AquariumPrgm.uTexture2,1);
 
         glDrawArrays(GL_TRIANGLES, 0 /* Pas d'offset au début du VBO */, aquaVertices.size());
+        
+        oceanTex2.unbind();
+        glActiveTexture(GL_TEXTURE0);
+        oceanTex1.unbind();
 
+
+        shader.use();
         //DESSIN DE L'ARPENTEUR
         MVMatrix = glm::mat4{1.f};
         MVMatrix = camera.getViewMatrix()*MVMatrix;
