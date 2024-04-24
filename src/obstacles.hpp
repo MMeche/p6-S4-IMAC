@@ -11,6 +11,7 @@ class Wall{
 
     public:
     static float UI_AQUARIUMSIZE;
+    Wall();
     Wall(float x,float y, float z, float width,float heigth,float depth) : _center{glm::vec3(x,y,z)},_width{width}, _heigth{heigth}, _depth{depth}{};
     Wall(glm::vec3 coords,float width, float heigth,float depth)         : _center{coords},_width{width}, _heigth{heigth}, _depth{depth}{};
     Wall(glm::vec3 coords, float size)                                   : _center{coords},_width{size}, _heigth{size}, _depth{size}{};

@@ -9,5 +9,5 @@ namespace glimac {
 std::vector<ShapeVertex> cone_vertices(float height, float radius, size_t discretization_latitude, size_t discretization_height);
 
 
-std::vector<ShapeVertex> aquarium(float size);
+std::vector<ShapeVertex> cube_vertices(float size);
 } // namespace glimac

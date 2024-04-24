@@ -17,18 +17,4 @@ struct AquariumProgram{
     }
 };
 
-struct LineProgram{
-    p6::Shader m_program;
-
-    GLint uMVPMatrix;
-    GLint uMVMatrix;
-    GLint uNormalMatrix;
-
-    LineProgram()
-        :m_program{p6::load_shader("shaders/line.vs.glsl","shaders/line.fs.glsl")}
-    {
-        uMVPMatrix    = glGetUniformLocation(m_program.id(),"uMVPMatrix");
-    }   
-};
-
 //Other structs of programs to be added (the fishes? / platforms.)
