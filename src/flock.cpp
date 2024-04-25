@@ -1,6 +1,6 @@
 #include "flock.hpp"
 #include "glm/common.hpp"
-#include "glm/ext/quaternion_geometric.hpp"
+#include "random.hpp"
 
 
 thread_local std::default_random_engine gen{std::random_device{}()};
@@ -17,7 +17,13 @@ Flock::Flock(int n)
         r_speed = glm::normalize(r_speed);
         r_speed = glm::min(r_speed,r_speed*Boid::MAXSPEED);
         
-        Boid boid = Boid(r_pos,r_speed);
+        int type{};
+        glm::vec4 color{0.8,normale(0,1),0.2,1.};
+        float tirage = exponentielle(2);
+        if(tirage>0.5){type = 1;}
+
+        
+        Boid boid = Boid(r_pos,r_speed,type,color);
         _boids.push_back(boid);
     }
 }
@@ -31,7 +37,12 @@ void Flock::instantiateNewBoid(int n)
         r_speed = glm::normalize(r_speed);
         r_speed = glm::min(r_speed,r_speed*Boid::MAXSPEED);
         
-        Boid boid = Boid(r_pos,r_speed);
+        int type{};
+        float tirage = exponentielle(2);
+        if(tirage>0.5){type = 1;}
+        
+        glm::vec4 color{0.8,normale(0,1),0.2,1.};
+        Boid boid = Boid(r_pos,r_speed,type,color);
         _boids.push_back(boid);
     }
 }

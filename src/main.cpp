@@ -323,12 +323,10 @@ int main()
         if(ctx.mouse_button_is_pressed(p6::Button{GLFW_MOUSE_BUTTON_LEFT}) && ctx.mouse_delta()!=glm::vec2{0.,0.}){
             catWalker.turn(ctx.mouse_delta(),ctx.delta_time());
         };
-        catWalker.stayInBox(aquarium.getWidth(), aquarium.getHeigth(), aquarium.getDepth());
+        catWalker.update(aquarium.getWidth());
         FreeflyCamera camera = catWalker.getCamera();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
-        
         
 
         glm::mat4 ProjMatrix   = glm::perspective(glm::radians(100.f), ctx.aspect_ratio(), 0.1f, 100.f);
@@ -340,10 +338,8 @@ int main()
         // DESSIN DES BOIDS
         for (Boid& b : boids.getFlock())
         {
-
-            FishPrgm.m_program.use();
+            color = b.getColor();
             glm::vec3 direction = -b.getSpeed();
-            color = glm::vec4{float(251)/255,float(163)/255,float(9)/255,1.};
             MVMatrix = glm::mat4{1.f};
             MVMatrix     = camera.getViewMatrix()*MVMatrix;
             MVMatrix     = glm::translate(MVMatrix, b.getCoords());
@@ -351,24 +347,40 @@ int main()
             MVMatrix     = glm::scale(MVMatrix, glm::vec3{.02f*Boid::UI_meshRadius});
             NormalMatrix = glm::transpose(glm::inverse(MVMatrix));
             MVPMatrix = ProjMatrix * MVMatrix;
-            glUniformMatrix4fv(FishPrgm.uNormalMatrix,1,GL_FALSE,glm::value_ptr(NormalMatrix));
-            glUniformMatrix4fv(FishPrgm.uMVMatrix,1,GL_FALSE,glm::value_ptr(MVMatrix));
-            glUniformMatrix4fv(FishPrgm.uMVPMatrix,1,GL_FALSE,glm::value_ptr(MVPMatrix));
-            glUniform4f(FishPrgm.uColor,color.x,color.y,color.z,color.w);
-            
-            float distance = glm::distance(b.getCoords(), camera.getPos());
-            if(distance<0.5){
-                vaoFishHQ.bind();
-                glDrawArrays(GL_TRIANGLES, 0, fishVerticesBQ.size());
-                vaoFishHQ.unbind();
+            if(b.getType()==0){
+                FishPrgm.m_program.use();    
+                glUniformMatrix4fv(FishPrgm.uNormalMatrix,1,GL_FALSE,glm::value_ptr(NormalMatrix));
+                glUniformMatrix4fv(FishPrgm.uMVMatrix,1,GL_FALSE,glm::value_ptr(MVMatrix));
+                glUniformMatrix4fv(FishPrgm.uMVPMatrix,1,GL_FALSE,glm::value_ptr(MVPMatrix));
+                glUniform4f(FishPrgm.uColor,color.x,color.y,color.z,color.w);
+                
+                float distance = glm::distance(b.getCoords(), camera.getPos());
+                if(distance<0.5){
+                    vaoFishHQ.bind();
+                    glDrawArrays(GL_TRIANGLES, 0, fishVerticesBQ.size());
+                    vaoFishHQ.unbind();
+                }
+                else{
+                    vaoFishBQ.bind();
+                    glDrawArrays(GL_TRIANGLES, 0, fishVerticesHQ.size());
+                    vaoFishBQ.unbind();
+                }
             }
             else{
-                vaoFishBQ.bind();
-                glDrawArrays(GL_TRIANGLES, 0, fishVerticesHQ.size());
-                vaoFishBQ.unbind();
+                StarPrgm.m_program.use();
+                glUniformMatrix4fv(StarPrgm.uNormalMatrix,1,GL_FALSE,glm::value_ptr(NormalMatrix));
+                glUniformMatrix4fv(StarPrgm.uMVMatrix,1,GL_FALSE,glm::value_ptr(MVMatrix));
+                glUniformMatrix4fv(StarPrgm.uMVPMatrix,1,GL_FALSE,glm::value_ptr(MVPMatrix));
+                glUniform4f(StarPrgm.uColor,color.x,color.y,color.z,color.w);
+                
+                float distance = glm::distance(b.getCoords(), camera.getPos());
+                if(distance<0.5){
+                vaoStarBQ.bind();
+                    glDrawArrays(GL_TRIANGLES, 0, starVerticesBQ.size());
+                    vaoFishHQ.unbind();
+                 vaoStarBQ.unbind();
+                }
             }
-             
-
         }
         
         
@@ -408,16 +420,24 @@ int main()
         vaoStarBQ.bind();
         
         MVMatrix = glm::mat4{1.f};
-        MVMatrix = camera.getViewMatrix()*MVMatrix;
+        
+
         MVMatrix = glm::translate(MVMatrix,camera.getPos());
         MVMatrix = glm::rotate(MVMatrix,glm::angle(glm::normalize(catWalker.getForward()),glm::normalize(camera.getFront())),glm::normalize(glm::cross(catWalker.getForward(),camera.getFront())));
         MVMatrix = glm::translate(MVMatrix,catWalker.getCoords()-camera.getPos());
+        MVMatrix = camera.getViewMatrix()*MVMatrix;
+        
+
         MVMatrix = glm::scale(MVMatrix, glm::vec3{catWalker.getSize()});
         NormalMatrix = glm::transpose(glm::inverse(MVMatrix));
         MVPMatrix = ProjMatrix * MVMatrix;
 
-        color = glm::vec4{0.9,0.2,0.4,1.};
+        if(catWalker.getState()){
+            color = glm::vec4{1.0,0.1,0.1,1.};
 
+        }else{
+            color = glm::vec4{0.9,0.2,0.4,1.};
+        }
         glUniformMatrix4fv(StarPrgm.uNormalMatrix,1,GL_FALSE,glm::value_ptr(NormalMatrix));
         glUniformMatrix4fv(StarPrgm.uMVMatrix,1,GL_FALSE,glm::value_ptr(MVMatrix));
         glUniformMatrix4fv(StarPrgm.uMVPMatrix,1,GL_FALSE,glm::value_ptr(MVPMatrix));
@@ -428,7 +448,5 @@ int main()
         vaoStarBQ.unbind();
 
     };
-
-    // Should be done last. It starts the infinite loop.
     ctx.start();
 }

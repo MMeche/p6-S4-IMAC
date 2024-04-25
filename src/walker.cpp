@@ -1,5 +1,6 @@
 #include "walker.hpp"
 #include "FreeflyCamera.hpp"
+#include "random.hpp"
 
 void Walker::setCoords(glm::vec3 newCoords){
     _coords = newCoords;
@@ -20,7 +21,7 @@ glm::vec3 Walker::getForward(){
     return _forward;
 }
 
-Walker::Walker() : /*Wall(_coords,Wall::UI_AQUARIUMSIZE*0.1f),*/_coords{}, _velocity{0.05f}, _camera{FreeflyCamera()}, _forward{glm::vec3{0.,0.,-1.}}
+Walker::Walker() : /*Wall(_coords,Wall::UI_AQUARIUMSIZE*0.1f),*/_coords{}, _velocity{0.01f}, _camera{FreeflyCamera()}, _forward{glm::vec3{0.,0.,-1.}}
 {
     
     _camera.setPos(_coords+glm::vec3{0.,0.25,0.25});
@@ -53,6 +54,15 @@ void Walker::stayInBox(float width,float height,float depth){
     };
     _camera.setPos(_coords+glm::vec3{0.,0.25,0.25});
 }
+ void Walker::update(float size){
+    stayInBox(size, size, size);
+    nextKittyMarkov(_state);
+    if(_state){
+        _velocity = 0.02f;
+    }else{
+        _velocity = 0.01f;
+    }
+ }
 
 void Walker::moveForward(){
     _coords += _velocity*_camera.getFront();

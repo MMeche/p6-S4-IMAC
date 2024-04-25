@@ -17,7 +17,10 @@ class Boid{
         float _alignementRadius = 0.4;
         float _cohesionRadius   = 0.4;
 
-        float _obstacleRadius   = 0.2; 
+        float _obstacleRadius   = 0.2;
+
+        int _type = 0 ; //0 for fish 1 for star;
+        glm::vec4 _color;
 
         
     public:
@@ -33,8 +36,8 @@ class Boid{
         const float meshRadius = 0.05;
 
     Boid()= default;
-    Boid(glm::vec3& posit,glm::vec3& speed)
-         : _coords{posit},_velocity{speed}
+    Boid(glm::vec3& posit,glm::vec3& speed, int& type, glm::vec4& color)
+         : _coords{posit},_velocity{speed}, _type{type}, _color{color}
          {};
 
     void SeparationForce(std::vector<Boid>& f,std::vector<Wall>& o);
@@ -45,6 +48,8 @@ class Boid{
 
     inline glm::vec3 getCoords(){return _coords;};
     inline glm::vec3 getSpeed(){return _velocity;};
+    inline int getType(){return _type;};
+    inline glm::vec4 getColor(){return _color;};
 
 
     inline void setCoords(glm::vec3 pos){_coords = pos;};
