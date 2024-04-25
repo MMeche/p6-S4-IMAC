@@ -5,8 +5,9 @@ in vec3 vNormal_vs;
 in vec2 vTexCoords;
 
 out vec4 fFragColor;
+uniform vec4 uColor;
 
 void main()
 {
-    fFragColor = vec4(normalize(vNormal_vs),1);
+    fFragColor = uColor;
 }

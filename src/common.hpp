@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 
+
 namespace glimac {
 
 struct ShapeVertex {
@@ -9,5 +10,10 @@ struct ShapeVertex {
     glm::vec3 normal;
     glm::vec2 texCoords;
 };
+
+
+
+
+
 
 } // namespace glimac
