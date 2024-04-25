@@ -129,11 +129,12 @@ std::vector<glimac::ShapeVertex> minimalLoadOBJ(const std::string& filePath) {
             minimalProcessFaceVertex(vertex1, vertices);
             minimalProcessFaceVertex(vertex2, vertices);
             minimalProcessFaceVertex(vertex3, vertices);
-
+            if(!vertex4.empty()){
             // Second triangle
             minimalProcessFaceVertex(vertex1, vertices);
             minimalProcessFaceVertex(vertex3, vertices);
             minimalProcessFaceVertex(vertex4, vertices);
+            }
         }
     }
     

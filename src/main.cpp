@@ -27,6 +27,7 @@
 #include"glm/gtc/type_ptr.hpp"
 #include "glm/gtc/random.hpp"
 #include "GLclass.hpp"
+#include "clouds.hpp"
 #include "programs.hpp"
 
 int main()
@@ -38,10 +39,11 @@ int main()
     Wall aquarium = Wall(glm::vec3(0,0,0),2*Wall::UI_AQUARIUMSIZE);
     std::vector<Wall> obstacles;
     Walker catWalker;
+    Clouds clouds;
     obstacles.push_back(aquarium);
     //obstacles.push_back(catWalker);
     
-    img::Image cloud = p6::load_image_buffer("assets/clouds.jpg");
+    
     img::Image souslocean1 = p6::load_image_buffer("assets/textures/aquarium_1.png");
     img::Image souslocean2 = p6::load_image_buffer("assets/textures/aquarium_2.png");
 
@@ -50,6 +52,8 @@ int main()
     
     const std::vector<glimac::ShapeVertex> starVerticesBQ = minimalLoadOBJ("assets/obj/star_bq.obj");
     const std::vector<glimac::ShapeVertex> starVerticesHQ = minimalLoadOBJ("assets/obj/star_hq.obj");
+
+    const std::vector<glimac::ShapeVertex> cloudVerticesHQ = minimalLoadOBJ("assets/obj/cloud1.obj");
     
     
     
@@ -61,6 +65,7 @@ int main()
     AquariumProgram AquariumPrgm{};
     FishProgram FishPrgm{};
     StarProgram StarPrgm{};
+    CloudProgram CloudPrgm{};
 
     ctx.maximize_window();
     
@@ -79,6 +84,10 @@ int main()
 
     VBO vboAquarium{};
     VAO vaoAquarium{};
+
+
+    VBO vboCloud{};
+    VAO vaoCloud{};
      //texture bindings
         TextureID oceanTex1{};
         TextureID oceanTex2{};
@@ -117,6 +126,10 @@ int main()
     const std::vector<glimac::ShapeVertex> aquaVertices = glimac::cube_vertices(1.);
     glBufferData(GL_ARRAY_BUFFER,aquaVertices.size()*sizeof(glimac::ShapeVertex),aquaVertices.data(),GL_STATIC_DRAW);
     vboAquarium.unbind();
+
+    vboCloud.bind();
+    glBufferData(GL_ARRAY_BUFFER,cloudVerticesHQ.size()*sizeof(glimac::ShapeVertex),cloudVerticesHQ.data(),GL_STATIC_DRAW);
+    vboCloud.unbind();
     
     vaoFishBQ.bind();
     static constexpr GLuint vertex_attr_position = 0;
@@ -299,7 +312,40 @@ int main()
 
     vboAquarium.unbind();
     vaoAquarium.unbind();
-
+    
+    vaoCloud.bind();
+    glEnableVertexAttribArray(vertex_attr_position);
+    glEnableVertexAttribArray(vertex_attr_normal);
+    glEnableVertexAttribArray(vertex_attr_tex);
+    vboCloud.bind();   
+    
+    glVertexAttribPointer(
+        vertex_attr_position /* Indice attribut */,
+        3 /* Nombre de composantes */,
+        GL_FLOAT /* Type d'une composante */,
+        GL_FALSE /* Pas de normalisation */,
+        sizeof(glimac::ShapeVertex) /* Taille en octet d'un vertex complet entre chaque attribut position */,
+        (const GLvoid*)offsetof(glimac::ShapeVertex, position)/* OpenGL doit utiliser le VBO attaché à GL_ARRAY_BUFFER et commencer à l'offset 0 */
+    );
+    
+    glVertexAttribPointer(
+        vertex_attr_normal /* Indice attribut */,
+        3 /* Nombre de composantes */,
+        GL_FLOAT /* Type d'une composante */,
+        GL_FALSE /* Pas de normalisation */,
+        sizeof(glimac::ShapeVertex) /* Taille en octet d'un vertex complet entre chaque attribut position */,
+        (const GLvoid*)offsetof(glimac::ShapeVertex, normal) /* OpenGL doit utiliser le VBO attaché à GL_ARRAY_BUFFER et commencer à l'offset 0 */
+    );    
+    glVertexAttribPointer(
+        vertex_attr_tex,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(glimac::ShapeVertex),
+        (const GLvoid*)offsetof(glimac::ShapeVertex, texCoords)
+    );
+    vboCloud.unbind();
+    vaoCloud.unbind();
     
     glEnable(GL_DEPTH_TEST);
     
@@ -325,6 +371,7 @@ int main()
         };
         catWalker.update(aquarium.getWidth());
         FreeflyCamera camera = catWalker.getCamera();
+        clouds.updateCloud();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
@@ -442,6 +489,26 @@ int main()
         glDrawArrays(GL_TRIANGLES,0,starVerticesBQ.size());
 
         vaoStarBQ.unbind();
+
+        //DESSIN DES NUAGES Didn't make it in time
+        // CloudPrgm.m_program.use();
+        
+        // MVMatrix = glm::mat4{1.f};
+        // MVMatrix     = camera.getViewMatrix()*MVMatrix;
+        // MVMatrix = glm::scale(MVMatrix, glm::vec3{0.1f*Wall::UI_AQUARIUMSIZE});
+
+        // NormalMatrix = glm::transpose(glm::inverse(MVMatrix));
+        // MVPMatrix = ProjMatrix * MVMatrix;
+        // color = glm::vec4(1.,1.,1.,1.);
+
+        // glUniformMatrix4fv(CloudPrgm.uNormalMatrix,1,GL_FALSE,glm::value_ptr(NormalMatrix));
+        // glUniformMatrix4fv(CloudPrgm.uMVMatrix,1,GL_FALSE,glm::value_ptr(MVMatrix));
+        // glUniformMatrix4fv(CloudPrgm.uMVPMatrix,1,GL_FALSE,glm::value_ptr(MVPMatrix));
+        // glUniform4f(CloudPrgm.uColor,color.x,color.y,color.z,color.w);
+
+        // vaoCloud.bind();
+        // glDrawArrays(GL_TRIANGLES,0,cloudVerticesHQ.size());
+        // vaoCloud.unbind();
 
     };
     ctx.start();

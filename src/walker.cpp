@@ -24,7 +24,7 @@ glm::vec3 Walker::getForward(){
 Walker::Walker() : /*Wall(_coords,Wall::UI_AQUARIUMSIZE*0.1f),*/_coords{}, _velocity{0.01f}, _camera{FreeflyCamera()}, _forward{glm::vec3{0.,0.,-1.}}
 {
     
-    _camera.setPos(_coords+glm::vec3{0.,0.25,0.25});
+    _camera.setPos(_coords+glm::vec3{0.,0.3,0.3});
 };
 
 
@@ -52,7 +52,7 @@ void Walker::stayInBox(float width,float height,float depth){
     if(_coords.z-_size <= -depth/2){
         _coords.z = -depth/2+_size;
     };
-    _camera.setPos(_coords+glm::vec3{0.,0.25,0.25});
+    _camera.setPos(_coords+glm::vec3{0.,0.3,0.3});
 }
  void Walker::update(float size){
     stayInBox(size, size, size);

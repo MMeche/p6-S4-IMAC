@@ -9,6 +9,13 @@ double rand01() {
     return distrib(gen);
 }
 
+double rand_11(){
+    thread_local std::default_random_engine gen{std::random_device{}()};
+    thread_local auto distrib = std::uniform_real_distribution<double>{-1.0, 1.0};
+
+    return distrib(gen);
+}
+
 // Even dice
 int diceEven() {
     return 1+floor(6*rand01());

@@ -5,6 +5,8 @@
 
 double rand01();
 
+double rand_11();
+
 int pileFace(double p);
 
 int diceEven();
