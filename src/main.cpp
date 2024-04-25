@@ -373,13 +373,9 @@ int main()
                 glUniformMatrix4fv(StarPrgm.uMVPMatrix,1,GL_FALSE,glm::value_ptr(MVPMatrix));
                 glUniform4f(StarPrgm.uColor,color.x,color.y,color.z,color.w);
                 
-                float distance = glm::distance(b.getCoords(), camera.getPos());
-                if(distance<0.5){
                 vaoStarBQ.bind();
-                    glDrawArrays(GL_TRIANGLES, 0, starVerticesBQ.size());
-                    vaoFishHQ.unbind();
-                 vaoStarBQ.unbind();
-                }
+                glDrawArrays(GL_TRIANGLES, 0, starVerticesBQ.size());
+                vaoStarBQ.unbind();
             }
         }
         
